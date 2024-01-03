@@ -1,69 +1,90 @@
-import random
+import json
+import pandas as pd
 import requests
-from alpha_vantage.timeseries import TimeSeries
 
 class PaperTrader:
     def __init__(self, initial_balance):
         self.balance = initial_balance
         self.portfolio = {}
 
-    def cost(self, quantity, price):
-        return price * quantity
-    
     def buy(self, symbol, quantity, price):
-        if self.cost(quantity, price) > self.balance:
-            print("You do not have the required funds to confirm this purchase.")
-            print(f"You currently have {self.balance} and the required cost is {self.cost(quantity, price)}")
+        cost = quantity * price
+        if cost > self.balance:
+            print("Insufficient funds to make the purchase.")
             return
-        
+
         if symbol not in self.portfolio:
             self.portfolio[symbol] = 0
 
         self.portfolio[symbol] += quantity
-        self.balance -= self.cost(quantity, price)
-        
+        self.balance -= cost
+
         print(f"Bought {quantity} shares of {symbol} at ${price:.2f} each.")
 
     def sell(self, symbol, quantity, price):
         if symbol not in self.portfolio or self.portfolio[symbol] < quantity:
-            print(f"You do not own enough shares of {symbol}.")
+            print("Not enough shares to sell.")
             return
 
+        revenue = quantity * price
         self.portfolio[symbol] -= quantity
-        self.balance += self.cost(quantity, price)
-        
+        self.balance += revenue
+
         print(f"Sold {quantity} shares of {symbol} at ${price:.2f} each.")
 
-def stock_symbols(API_key):
-    endpoint = f"https://www.alphavantage.co/query?function=LISTING_STATUS&apikey={API_key}&datatype=csv"
-    
-    try:
-        response = requests.get(endpoint)
-        response.raise_for_status()  # Raises HTTPError for bad responses (4xx and 5xx)
+    def display_portfolio(self):
+        print("\nPortfolio Summary:")
+        print(f"Balance: ${self.balance:.2f}\n")
+        print("Stocks:")
+        
+        total_portfolio_value = self.balance
 
-        data = response.text
-        lines = data.split('\n')[1:]  # Skip the header
-        symbols = [line.split(',')[0] for line in lines if line]
-        return symbols
+        for symbol, quantity in self.portfolio.items():
+            price = historical_prices[symbol]
+            stock_value = quantity * price
+            total_portfolio_value += stock_value
 
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-    
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+            print(f"{symbol}: {quantity} shares - Current Price: ${price:.2f} - Value: ${stock_value:.2f}")
 
-    return []
+# Usage: US Stocks Market List .txt File
+def read_symbols(file_path):
+    with open(file_path, 'r') as file:
+        symbols_string = file.read()
+        symbols_list = eval(symbols_string)
     
+    return symbols_list
+
+symbols_list = read_symbols("stock_symbols_list.txt")
+
+# Usage: API Key From EODHD APIs (https://www.eodhd.com)
+"""
+def get_exchange_data(key, exchange='US'):
+    endpoint = f"https://eodhistoricaldata.com/api/exchange-symbol-list/{exchange}?api_token={key}&fmt=json"
+    call = requests.get(endpoint).text
+    exchange_data = pd.DataFrame(json.loads(call))
+    
+    return exchange_data
+
+def get_security_type(exchange_data, type= "Common Stock"):
+    symbols = exchange_data[exchange_data.Type == type]
+    return symbols.Code.to_list()  
+
+key = "6594a4c32feaf1.06096799"
+symbols_list = get_security_type(get_exchange_data(key))
+"""
+
 # MAIN
-API_key = 'PI52LS9BXFLZCCSB'
-symbol_list = stock_symbols(API_key)
+historical_prices = {symbol: 100 for symbol in symbols_list}
 
-initial_balance = float(input("Enter your initial balance: "))
-trader = PaperTrader(initial_balance=initial_balance)
+while True:
+    try:
+        balance = int(input("Please enter the initial balance of your trading account: "))
+        break
 
+    except ValueError:
+        print("Invalid input. Please enter a valid integer for the initial balance.")
+
+trader = PaperTrader(initial_balance = balance)
 trader.display_portfolio()
 
 while True:
@@ -71,34 +92,33 @@ while True:
 
     if action == 'q':
         break
-    
+
     elif action == 'b':
         symbol = input("Enter the stock symbol: ").upper()
-        
-        if symbol not in symbol_list:
-            print("Invalid stock symbol. Please choose from the available symbols.")
+
+        if symbol not in symbols_list:
+            print("Stock Symbol Not Found In Simulation. Please Try Another Stock")
             continue
 
         quantity = int(input("Enter the quantity to buy: "))
-        price = random.uniform(50, 200)  # You can fetch the real-time price using another API
+        price = historical_prices[symbol]
         trader.buy(symbol, quantity, price)
     
     elif action == 's':
-        symbol = input("Enter the stock symbol: ").upper()
-        
-        if symbol not in symbol_list:
-            print("Invalid stock symbol. Please choose from the available symbols.")
+        symbol = input("Enter the stock symbol: ")
+
+        if symbol not in symbols_list:
+            print("Invalid stock symbol.")
             continue
 
         quantity = int(input("Enter the quantity to sell: "))
-        price = random.uniform(50, 200)  # You can fetch the real-time price using another API
+        price = historical_prices[symbol]
         trader.sell(symbol, quantity, price)
-    
+   
     elif action == 'v':
         trader.display_portfolio()
-        print("Available Stock Symbols:", symbol_list)
     
     else:
         print("Invalid option. Please enter 'b', 's', 'v', or 'q'.")
 
-print("Simulation ended.")
+print("Simulation has ended.")
