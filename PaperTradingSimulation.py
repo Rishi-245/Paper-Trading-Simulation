@@ -46,7 +46,7 @@ class PaperTrader:
 
             print(f"{symbol}: {quantity} shares - Current Price: ${price:.2f} - Value: ${stock_value:.2f}")
 
-# Usage: US Stocks Market List .txt File
+# Usage: Stocks in US Stock Exchange - Symbol List in .txt File
 def read_symbols(file_path):
     with open(file_path, 'r') as file:
         symbols_string = file.read()
