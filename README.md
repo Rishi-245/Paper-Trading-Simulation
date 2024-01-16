@@ -1,16 +1,16 @@
 # Paper-Trading-Simulation
-This Python program creates a simple paper trading simulation for beginner traders using the Alpha Vintage API. The PaperTrader class within the program allows users to buy and sell stocks based on randomly generated prices which try to simulate the market. Additionally, the program allows the user to visualize their portfolio and balance to view profits or losses.
 
-## Features
-**Buy and Sell:** Users enter stock symbols to buy or sell certain stocks at a certain price and quantity.
-
-**Portfolio Display:** Users can view their portfolio of all the different stocks purchased along with the number of shares in that stock.
-
-**Stock Symbols Validation:** Using the Alpha Vintage API, a list of stock symbols are obtained for the user to choose from.
-
-**User Interface:** *Currently, the program allows the user to buy, sell, view portfolio or quit the program. Future changes could allow the program to have a proper user interface in the form of a webpage.
+## Description
+This Python program implements a simple paper trading simulation using the PaperTrader class. The simulation allows users to buy and sell stocks with an initial balance, displaying the portfolio summary after each transaction. The user interacts with the simulation through a command-line interface, choosing to buy, sell, view the portfolio, or quit the simulation. Stock symbols are read from a predefined list, and historical prices are simulated for each stock. The script provides a basic yet functional introduction to paper trading, allowing users to practice trading strategies without risking real capital.
 
 ## Dependencies
-Python 3
+### API
+The script incorporates the EODHD API to dynamically fetch exchange data. This API, accessible at EODHD APIs, provides historical stock data. The get_exchange_data function is designed to retrieve a list of symbols for a specified exchange, while the get_security_type function filters symbols based on security types, with "Common Stock" being the default. Note that you need to obtain an API key from EODHD to use this functionality.
 
-Requests Library
+### File I/O
+The script reads stock symbols from a text file, stock_symbols_list.txt. This file contains a list of stock symbols that the user can interact with during the paper trading simulation. The symbols are read from the file and stored in the symbols_list variable.
+
+## Future Updates
+- create a webpage for the user to interact with
+- use the API to gather real time stock prices
+- connect to other stock exchanges (currently it is only the US Stock Exchange)
