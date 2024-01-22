@@ -40,7 +40,7 @@ class PaperTrader:
         total_portfolio_value = self.balance
 
         for symbol, quantity in self.portfolio.items():
-            price = historical_prices[symbol]
+            price = prices[symbol]
             stock_value = quantity * price
             total_portfolio_value += stock_value
 
@@ -74,7 +74,7 @@ symbols_list = get_security_type(get_exchange_data(key))
 """
 
 # MAIN
-historical_prices = {symbol: 100 for symbol in symbols_list}
+prices = {symbol: 100 for symbol in symbols_list}
 
 while True:
     try:
@@ -101,7 +101,7 @@ while True:
             continue
 
         quantity = int(input("Enter the quantity to buy: "))
-        price = historical_prices[symbol]
+        price = prices[symbol]
         trader.buy(symbol, quantity, price)
     
     elif action == 's':
@@ -112,7 +112,7 @@ while True:
             continue
 
         quantity = int(input("Enter the quantity to sell: "))
-        price = historical_prices[symbol]
+        price = prices[symbol]
         trader.sell(symbol, quantity, price)
    
     elif action == 'v':
